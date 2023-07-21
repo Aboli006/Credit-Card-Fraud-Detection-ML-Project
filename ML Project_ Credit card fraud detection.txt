@@ -1,0 +1,89 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, f1_score
+from sklearn.manifold import TSNE
+
+# Load the dataset
+data = pd.read_csv('credit_card_fraud_dataset.csv')  # Replace 'credit_card_fraud_dataset.csv' with your dataset filename
+
+# Perform Exploratory Data Analysis (EDA)
+# You can analyze data distributions, missing values, etc.
+
+# Plotting the correlation heatmap
+correlation_matrix = data.corr()
+plt.figure(figsize=(12, 10))
+sns.heatmap(correlation_matrix, cmap='coolwarm', annot=True, fmt='.2f')
+plt.title('Correlation Heatmap')
+plt.show()
+
+# Preprocessing the data
+X = data.drop('Class', axis=1)  # Assuming 'Class' is the target variable (fraud or not)
+y = data['Class']
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Feature scaling
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Initialize and train various machine learning models
+# Logistic Regression
+lr_model = LogisticRegression()
+lr_model.fit(X_train_scaled, y_train)
+lr_preds = lr_model.predict(X_test_scaled)
+
+# K-Nearest Neighbors (KNN)
+knn_model = KNeighborsClassifier(n_neighbors=5)
+knn_model.fit(X_train_scaled, y_train)
+knn_preds = knn_model.predict(X_test_scaled)
+
+# Support Vector Machine (SVM)
+svm_model = SVC(kernel='linear', C=1.0)
+svm_model.fit(X_train_scaled, y_train)
+svm_preds = svm_model.predict(X_test_scaled)
+
+# Decision Tree Classifier
+dt_model = DecisionTreeClassifier()
+dt_model.fit(X_train_scaled, y_train)
+dt_preds = dt_model.predict(X_test_scaled)
+
+# Evaluate the models
+lr_accuracy = accuracy_score(y_test, lr_preds)
+lr_f1_score = f1_score(y_test, lr_preds)
+
+knn_accuracy = accuracy_score(y_test, knn_preds)
+knn_f1_score = f1_score(y_test, knn_preds)
+
+svm_accuracy = accuracy_score(y_test, svm_preds)
+svm_f1_score = f1_score(y_test, svm_preds)
+
+dt_accuracy = accuracy_score(y_test, dt_preds)
+dt_f1_score = f1_score(y_test, dt_preds)
+
+# Print the results
+print("Logistic Regression - Accuracy:", lr_accuracy, "F1 Score:", lr_f1_score)
+print("K-Nearest Neighbors - Accuracy:", knn_accuracy, "F1 Score:", knn_f1_score)
+print("Support Vector Machine - Accuracy:", svm_accuracy, "F1 Score:", svm_f1_score)
+print("Decision Tree Classifier - Accuracy:", dt_accuracy, "F1 Score:", dt_f1_score)
+
+# Apply t-SNE for data visualization
+tsne = TSNE(n_components=2, random_state=42)
+X_tsne = tsne.fit_transform(X_train_scaled)
+
+# Create a scatter plot for t-SNE visualization
+plt.figure(figsize=(8, 6))
+plt.scatter(X_tsne[:, 0], X_tsne[:, 1], c=y_train, cmap='coolwarm', s=20)
+plt.title('t-SNE Visualization')
+plt.colorbar()
+plt.show()
